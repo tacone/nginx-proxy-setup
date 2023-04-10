@@ -6,10 +6,12 @@ mkdir -p $CERTS
 
 update=1
 
+if [ ! -f $CERTS/traefik.me.crt ] || [ ! -f $CERTS/traefik.me.chain.crt ] || [ ! -f $CERTS/traefik.me.key ]; then
+    update=1
 # if the check argument is present, check the certificates
-if [ "$1" = "--check" ]; then
+elif [ "$1" = "--check" ]; then
     # if any files in the certs directory have been modified in the last 24 hours update the certificates
-    if find $CERTS -type f -mtime +0 | read; then
+    if find $CERTS -name 'traefik.me.*' -type f -mtime +0 | read; then
         update=1
     else
         echo "Certificates are up to date"
