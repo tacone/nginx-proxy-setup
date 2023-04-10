@@ -29,6 +29,7 @@ services:
     restart: always
     volumes:
       - ./conf.d:/etc/nginx/conf.d:rw
+      - ${SHARED_CONF}:/etc/nginx/vhost.d:ro
       - ./certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
