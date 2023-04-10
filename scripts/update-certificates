@@ -1,0 +1,52 @@
+#!/bin/bash
+
+source $(dirname "$0")/lib/init
+
+mkdir -p $CERTS
+
+update=1
+
+# if the check argument is present, check the certificates
+if [ "$1" = "--check" ]; then
+    # if any files in the certs directory have been modified in the last 24 hours update the certificates
+    if find $CERTS -type f -mtime +0 | read; then
+        update=1
+    else
+        echo "Certificates are up to date"
+        update=0
+    fi
+else
+    update=1
+fi
+
+# if update is set to 1, update the certificates
+
+if [ $update -eq 1 ]; then
+    error=0
+    echo "Updating certificates"
+    echo
+    echo ...downloading https://traefik.me/cert.pem
+    curl -s https://traefik.me/cert.pem > $CERTS/traefik.me.crt
+    [ $? -ne 0 ] && error=1
+    echo ...downloading https://traefik.me/chain.pem
+    curl -s https://traefik.me/chain.pem > $CERTS/traefik.me.chain.crt
+    [ $? -ne 0 ] && error=1
+    # echo ...downloading https://traefik.me/fullchain.pem
+    # curl -s https://traefik.me/fullchain.pem > $CERTS/fullchain.pem
+    # [ $? -ne 0 ] && error=1
+    echo ...downloading https://traefik.me/privkey.pem
+    curl -s https://traefik.me/privkey.pem > $CERTS/traefik.me.key
+    [ $? -ne 0 ] && error=1
+
+    # if error then print a message and exit
+    if [ $error -eq 1 ]; then
+        echo
+        echo Error updating certificates, make sure the permissions are ok
+        echo
+        echo Tryto run this command:
+        echo
+        echo sudo chown -R $USER:$USER $CERTS
+        echo
+        exit 1
+    fi
+fi

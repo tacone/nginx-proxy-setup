@@ -22,6 +22,8 @@
 {{- $_ := set $globals "ssl_policy" (or ($globals.Env.SSL_POLICY) "Mozilla-Intermediate") }}
 {{- $_ := set $globals "vhosts" (dict) }}
 {{- $_ := set $globals "networks" (dict) }}
+{{- $_ := set $globals "shared_data" (coalesce $globals.Env.SHARED_DATA "invalid-shared-data") }}
+
 # Networks available to the container running docker-gen (which are assumed to
 # match the networks available to the container running nginx):
 {{- /*
@@ -175,8 +177,9 @@
     {{- if and (eq .Path "/") (not (exists $override)) }}
         {{- $override = printf "/etc/nginx/vhost.d/%s_location_override" .Host }}
     {{- end }}
+
     {{- if exists $override }}
-    include {{ $override }};
+        include {{ $override }};
     {{- else }}
         {{- $keepalive := first (keys (groupByLabel .Containers "com.github.nginx-proxy.nginx-proxy.keepalive")) }}
     location {{ .Path }} {
@@ -284,6 +287,11 @@ map $upstream_keepalive $proxy_connection_noupgrade {
     # Use an empty string to cancel nginx's default behavior.
     true '';
 }
+
+map "" $shared_data {
+    default {{ $globals.shared_data }};
+}
+
 # Abuse the map directive (see <https://stackoverflow.com/q/14433309>) to ensure
 # that $upstream_keepalive is always defined.  This is necessary because:
 #   - The $proxy_connection variable is indirectly derived from
@@ -459,7 +467,10 @@ server {
             {{- $sum := sha1 $path }}
             {{- $upstream = printf "%s-%s" $upstream $sum }}
         {{- end }}
+
+
 # {{ $host }}{{ $path }}
+#
 {{ template "upstream" (dict "globals" $globals "Upstream" $upstream "Containers" $containers) }}
     {{- end }}
 
@@ -518,6 +529,9 @@ server {
 
 server {
     server_name {{ $host }};
+
+    set $shared_data '{{ $globals.shared_data }}';
+
     {{- if $server_tokens }}
     server_tokens {{ $server_tokens }};
     {{- end }}
@@ -567,7 +581,7 @@ server {
     ssl_certificate /etc/nginx/certs/default.crt;
     ssl_certificate_key /etc/nginx/certs/default.key;
     if ($https) {
-        return 500;
+        return 526;
     }
         {{- else }}
     # No certificate found for this vhost, so force nginx to emit a TLS error if
