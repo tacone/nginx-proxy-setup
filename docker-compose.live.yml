@@ -1,0 +1,27 @@
+version: '3'
+services:
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    restart: always
+    environment:
+      - DEFAULT_EMAIL=mail@yourdomain.tld
+      - NGINX_PROXY_CONTAINER=nginx
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d:rw
+      - ./certs:/etc/nginx/certs:rw
+      - ./html:/usr/share/nginx/html:rw
+      - acme:/etc/acme.sh
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${SHARED_CONF}:/etc/nginx/vhost.d:rw
+    network_mode: bridge
+
+
+volumes:
+  # conf:
+  # vhost:
+  # html:
+  # certs:
+  acme:
+  var-run:
+  var-cache:

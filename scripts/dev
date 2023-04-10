@@ -17,4 +17,6 @@ source $(dirname "$0")/lib/init
 
 source update-certificates --check
 
-docker-compose  "$@"
+COMMON="-f docker-compose.yml"
+
+docker-compose $COMMON "$@"
