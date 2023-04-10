@@ -12,7 +12,7 @@ services:
     volumes:
       - var-run:/var/run
       - var-cache:/var/cache/nginx
-      - ./conf.d:/etc/nginx/conf.d
+      - ./conf.d:/etc/nginx/conf.d:ro
       - ./certs:/etc/nginx/certs:ro
       - ./html:/usr/share/nginx/html:ro
       - ${SHARED_CONF}:/etc/nginx/vhost.d:ro
@@ -27,23 +27,26 @@ services:
     environment:
       - SHARED_DATA
     restart: always
-    volumes_from:
-      - nginx
     volumes:
+      - ./conf.d:/etc/nginx/conf.d:rw
+      - ./certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
 
   acme-companion:
     image: nginxproxy/acme-companion
     container_name: nginx-proxy-acme
+    restart: always
     environment:
       - DEFAULT_EMAIL=mail@yourdomain.tld
-    volumes_from:
-      - nginx
+      - NGINX_PROXY_CONTAINER=nginx
     volumes:
-      - certs:/etc/nginx/certs:rw
+      - ./conf.d:/etc/nginx/conf.d:rw
+      - ./certs:/etc/nginx/certs:rw
+      - ./html:/usr/share/nginx/html:rw
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${SHARED_CONF}:/etc/nginx/vhost.d:rw
     network_mode: bridge
 
   whoami:
@@ -52,10 +55,10 @@ services:
       - VIRTUAL_HOST=whoami.traefik.me
 
 volumes:
-  conf:
-  vhost:
-  html:
-  certs:
+  # conf:
+  # vhost:
+  # html:
+  # certs:
   acme:
   var-run:
   var-cache:
