@@ -606,6 +606,11 @@ server {
     {{- end }}
 
 
+    {{- if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
+    include {{ printf "/etc/nginx/vhost.d/%s" $host }};
+    {{- else if (exists "/etc/nginx/vhost.d/default") }}
+    include /etc/nginx/vhost.d/default;
+    {{- else }}
     # Do not HTTPS redirect Let's Encrypt ACME challenge
     location ^~ /.well-known/acme-challenge/ {
         auth_basic off;
@@ -615,11 +620,6 @@ server {
         try_files $uri =404;
         break;
     }
-
-    {{- if (exists (printf "/etc/nginx/vhost.d/%s" $host)) }}
-    include {{ printf "/etc/nginx/vhost.d/%s" $host }};
-    {{- else if (exists "/etc/nginx/vhost.d/default") }}
-    include /etc/nginx/vhost.d/default;
     {{- end }}
 
     {{- range $path, $containers := $paths }}
