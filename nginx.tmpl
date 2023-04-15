@@ -178,7 +178,7 @@
         {{- $override = printf "/etc/nginx/vhost.d/%s_location_override" .Host }}
     {{- end }}
 
-    {{- if exists $override }}
+    {{- if and (exists $override) (first (groupByKeys .Containers "Env.STATIC_WEBSITE"))}}
         include {{ $override }};
     {{- else }}
         {{- $keepalive := first (keys (groupByLabel .Containers "com.github.nginx-proxy.nginx-proxy.keepalive")) }}
