@@ -19,4 +19,4 @@ source update-certificates --check
 
 COMMON="-f docker-compose.yml"
 
-docker-compose $COMMON "$@"
+docker compose $COMMON "$@"
