@@ -27,15 +27,15 @@ if [ $update -eq 1 ]; then
     error=0
     echo "Updating certificates"
     echo
-    echo ...downloading https://traefik.me/cert.pem
-    curl -s https://traefik.me/cert.pem > $CERTS/traefik.me.crt
-    [ $? -ne 0 ] && error=1
+    # echo ...downloading https://traefik.me/cert.pem
+    # curl -s https://traefik.me/cert.pem > $CERTS/traefik.me.crt
+    # [ $? -ne 0 ] && error=1
     echo ...downloading https://traefik.me/chain.pem
     curl -s https://traefik.me/chain.pem > $CERTS/traefik.me.chain.crt
     [ $? -ne 0 ] && error=1
-    # echo ...downloading https://traefik.me/fullchain.pem
-    # curl -s https://traefik.me/fullchain.pem > $CERTS/fullchain.pem
-    # [ $? -ne 0 ] && error=1
+    echo ...downloading https://traefik.me/fullchain.pem
+    curl -s https://traefik.me/fullchain.pem > $CERTS/traefik.me.crt
+    [ $? -ne 0 ] && error=1
     echo ...downloading https://traefik.me/privkey.pem
     curl -s https://traefik.me/privkey.pem > $CERTS/traefik.me.key
     [ $? -ne 0 ] && error=1
